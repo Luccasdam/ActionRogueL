@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "SMagicProjectile.h"
 
 // Sets default values
 ASCharacter::ASCharacter()
@@ -23,7 +24,8 @@ ASCharacter::ASCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
 
-	//CharacterMovement->bOrientRotationToMovement = true;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
 }
 
@@ -54,20 +56,34 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 
+	PlayerInputComponent->BindAction("PrimaryAttack", IE_Pressed, this, &ASCharacter::PrimaryAttack);
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	
+
 }
 
 
 void ASCharacter::MoveForward(float Value)
 {
-	FVector CameraForward = CameraComp->GetForwardVector();
-	CameraForward.Z = .0f;
-	AddMovementInput(CameraForward, Value);
+	FRotator ControlRot = GetControlRotation();
+	ControlRot.Pitch = .0f;
+	AddMovementInput(ControlRot.Vector(), Value);
 }
 
 void ASCharacter::MoveRight(float Value)
 {
-	FVector CameraRight = CameraComp->GetRightVector();
-	CameraRight.Z = 0.f;
-	AddMovementInput(CameraRight, Value);
+	const FRotator ControlRot = GetControlRotation();
+	const FVector RightVector = FRotationMatrix(ControlRot).GetScaledAxis(EAxis::Y);
+	AddMovementInput(RightVector, Value);
 }
 
+void ASCharacter::PrimaryAttack()
+{
+	const FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+	const FTransform SpawnTM = FTransform(GetActorRotation(), HandLocation);
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
+	GetWorld()->SpawnActor<ASMagicProjectile>(ProjectileClass, SpawnTM, SpawnParams);
+}

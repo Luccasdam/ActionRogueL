@@ -8,11 +8,17 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class ASMagicProjectile;
 
 UCLASS()
 class ACTIONROGUEL_API ASCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+protected:
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<ASMagicProjectile> ProjectileClass;
 
 public:
 	// Sets default values for this character's properties
@@ -34,6 +40,8 @@ protected:
 	UFUNCTION()
 	void MoveRight(float Value);
 
+	UFUNCTION()
+	void PrimaryAttack();
 
 
 public:	
