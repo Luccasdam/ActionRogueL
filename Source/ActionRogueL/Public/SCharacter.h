@@ -8,6 +8,8 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class ASProjectileBase;
+class ASDashProjectile;
 class ASMagicProjectile;
 class USInteractionComponent;
 
@@ -19,12 +21,18 @@ class ACTIONROGUEL_API ASCharacter : public ACharacter
 protected:
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<ASMagicProjectile> ProjectileClass;
+	TSubclassOf<ASMagicProjectile> MagicProjectileClass;
 
 	UPROPERTY(EditAnywhere, Category = "Attack")
-	UAnimMontage* PrimaryAttackAnim;
+	TSubclassOf<ASProjectileBase> DashProjectileClass;
 
-	FTimerHandle TimerHandle_PrimaryAttack;
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	TSubclassOf<ASProjectileBase> UltimateProjectileClass;
+
+	UPROPERTY(EditAnywhere, Category = "Attack")
+	UAnimMontage* AttackAnim;
+
+	FTimerHandle TimerHandle_Attack;
 
 public:
 	// Sets default values for this character's properties
@@ -53,8 +61,23 @@ protected:
 	void PrimaryAttack();
 
 	UFUNCTION()
-	void PrimaryAttack_TimeElapsed() const;
+	void PrimaryAttack_TimeElapsed();
 
+	UFUNCTION()
+	void SecundaryAttack();
+
+	UFUNCTION()
+	void SecundaryAttack_TimeElapsed();
+	
+	UFUNCTION()
+	void UltimateAttack();
+
+	UFUNCTION()
+	void UltimateAttack_TimeElapsed();
+
+	UFUNCTION()
+	void Attack(TSubclassOf<ASProjectileBase> inProjectileClass);
+	
 	UFUNCTION()
 	void PrimaryInteract();
 
