@@ -18,9 +18,11 @@ ASExplosiveBarrel::ASExplosiveBarrel()
 
 	RFComp = CreateDefaultSubobject<URadialForceComponent>(TEXT("RFComp"));
 	RFComp->SetupAttachment(Mesh);
-	RFComp->Radius = 700.f;
-	RFComp->ImpulseStrength = 1500.f;
+	RFComp->SetAutoActivate(false);
+	RFComp->Radius = 750.f;
+	RFComp->ImpulseStrength = 2500.f;
 	RFComp->bImpulseVelChange = true;
+	RFComp->AddCollisionChannelToAffect(ECC_WorldDynamic);
 	
 
 }
