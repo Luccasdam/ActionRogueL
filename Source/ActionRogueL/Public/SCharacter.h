@@ -12,6 +12,7 @@ class ASProjectileBase;
 class ASDashProjectile;
 class ASMagicProjectile;
 class USInteractionComponent;
+class USAttributeComponent;
 
 UCLASS()
 class ACTIONROGUEL_API ASCharacter : public ACharacter
@@ -50,6 +51,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USInteractionComponent* InteractionComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	USAttributeComponent* AttributeComp;
 
 	UFUNCTION()
 	void MoveForward(float Value);

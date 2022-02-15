@@ -3,6 +3,7 @@
 
 #include "SExplosiveBarrel.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 
 // Sets default values
@@ -51,4 +52,7 @@ void ASExplosiveBarrel::Tick(float DeltaTime)
 void ASExplosiveBarrel::Explode(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	RFComp->FireImpulse();
+
+	const TArray<AActor*> IgnoreActors;
+	const TSubclassOf<UDamageType> DamageType;
 }
