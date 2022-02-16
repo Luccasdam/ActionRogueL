@@ -17,7 +17,8 @@ ASProjectileBase::ASProjectileBase()
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	SetRootComponent(SphereComp);
 	SphereComp->SetCollisionProfileName("Projectile");
-	SphereComp->IgnoreActorWhenMoving(this, true);
+	SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
+
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EffectComp"));
 	EffectComp->SetupAttachment(SphereComp);
@@ -31,12 +32,16 @@ ASProjectileBase::ASProjectileBase()
 void ASProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
+	UE_LOG(LogTemp, Log, TEXT("Instigator of Projectile is: %s"), *GetNameSafe(GetInstigator()))
 	
 }
 
 void ASProjectileBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	
 
 	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ASProjectileBase::OnComponentBeginOverlap);
 }
@@ -50,10 +55,14 @@ void ASProjectileBase::Tick(float DeltaTime)
 
 void ASProjectileBase::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (OtherActor == GetInstigator())	{return;}
+	
 	USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
 	if (AttributeComp)
 	{
 		AttributeComp->ApplyHealthChange(ProjectileDamage);
+
+		UE_LOG(LogTemp, Log, TEXT("Actor Hit is: %s"), *GetNameSafe(OtherActor))
 
 		CustomHit(SweepResult);
 	}
