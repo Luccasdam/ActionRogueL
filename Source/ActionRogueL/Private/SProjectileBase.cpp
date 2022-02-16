@@ -2,11 +2,11 @@
 
 
 #include "SProjectileBase.h"
-
-#include "SAttributeComponent.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+
 
 // Sets default values
 ASProjectileBase::ASProjectileBase()
@@ -17,8 +17,6 @@ ASProjectileBase::ASProjectileBase()
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	SetRootComponent(SphereComp);
 	SphereComp->SetCollisionProfileName("Projectile");
-	SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
-
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EffectComp"));
 	EffectComp->SetupAttachment(SphereComp);
@@ -28,42 +26,28 @@ ASProjectileBase::ASProjectileBase()
 	ProjMovComp->bRotationFollowsVelocity = true;
 }
 
-// Called when the game starts or when spawned
-void ASProjectileBase::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
-	UE_LOG(LogTemp, Log, TEXT("Instigator of Projectile is: %s"), *GetNameSafe(GetInstigator()))
-	
-}
 
 void ASProjectileBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	
 
-	SphereComp->OnComponentBeginOverlap.AddDynamic(this, &ASProjectileBase::OnComponentBeginOverlap);
+	SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);	
+	SphereComp->OnComponentHit.AddDynamic(this, &ASProjectileBase::OnActorHit);
 }
 
-// Called every frame
-void ASProjectileBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
+void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{	
+	Explode();
 }
 
-void ASProjectileBase::OnComponentBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+
+void ASProjectileBase::Explode_Implementation()
 {
-	if (OtherActor == GetInstigator())	{return;}
-	
-	USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
-	if (AttributeComp)
+	if (ensure(!IsPendingKill()))
 	{
-		AttributeComp->ApplyHealthChange(ProjectileDamage);
+		UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
 
-		UE_LOG(LogTemp, Log, TEXT("Actor Hit is: %s"), *GetNameSafe(OtherActor))
-
-		CustomHit(SweepResult);
+		Destroy();
 	}
 }

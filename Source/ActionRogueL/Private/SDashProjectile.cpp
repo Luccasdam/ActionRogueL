@@ -2,50 +2,45 @@
 
 
 #include "SDashProjectile.h"
-
-#include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystemComponent.h"
+
+ASDashProjectile::ASDashProjectile()
+{
+	DetonateDelay = 0.2f;
+	TeleportDelay = 0.2f;
+}
 
 void ASDashProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	GetWorldTimerManager().SetTimer(TimerHandle_Dash, this, &ASDashProjectile::Dash_TimeElapsed, .2f);
+	GetWorldTimerManager().SetTimer(TimerHandle_DelayedDetonate, this, &ASDashProjectile::Explode, DetonateDelay);
 }
 
-void ASDashProjectile::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
 
-	SphereComp->OnComponentHit.AddDynamic(this, &ASDashProjectile::OnDashHit);
-}
-
-void ASDashProjectile::Dash_TimeElapsed()
+void ASDashProjectile::Explode_Implementation()
 {
+	GetWorldTimerManager().ClearTimer(TimerHandle_DelayedDetonate);
+
+	UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+
+	EffectComp->DeactivateSystem();
 	ProjMovComp->StopMovementImmediately();
-
-	SphereComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	EffectComp->SetVisibility(false);
+	SetActorEnableCollision(false);
 	
-	UGameplayStatics::SpawnEmitterAtLocation(this, ExplosionParticle, GetActorLocation(), GetActorRotation());
-
-	GetWorldTimerManager().SetTimer(TimerHandle_Teleport, this, &ASDashProjectile::Teleport_TimeElapsed, .2f);
-
+	FTimerHandle TimerHandle_DelayedTeleport;
+	GetWorldTimerManager().SetTimer(TimerHandle_DelayedTeleport, this, &ASDashProjectile::TeleportInstigator, TeleportDelay);	
 }
 
-void ASDashProjectile::Teleport_TimeElapsed()
+void ASDashProjectile::TeleportInstigator()
 {
 	AActor* InstigatorActor = GetInstigator();
-	InstigatorActor->TeleportTo(GetActorLocation(), InstigatorActor->GetActorRotation());
+	if (ensure(InstigatorActor))
+	{
+		InstigatorActor->TeleportTo(GetActorLocation(), InstigatorActor->GetActorRotation());	
+	}
 
 	Destroy();
-}
-
-void ASDashProjectile::OnDashHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	GetWorldTimerManager().ClearTimer(TimerHandle_Dash);
-
-	Dash_TimeElapsed();
 }

@@ -21,6 +21,9 @@ class ACTIONROGUEL_API ASCharacter : public ACharacter
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, Category = "Attack")
+	float AnimAttackDelay = 0.169f;
+
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	TSubclassOf<ASMagicProjectile> MagicProjectileClass;
 

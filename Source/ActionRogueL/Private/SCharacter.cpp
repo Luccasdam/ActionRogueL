@@ -91,7 +91,7 @@ void ASCharacter::PrimaryAttack()
 {
 	PlayAnimMontage(AttackAnim);
 
-	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::PrimaryAttack_TimeElapsed, 0.169f);
+	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::PrimaryAttack_TimeElapsed, AnimAttackDelay);
 }
 
 void ASCharacter::PrimaryAttack_TimeElapsed()
@@ -103,7 +103,7 @@ void ASCharacter::SecundaryAttack()
 {
 	PlayAnimMontage(AttackAnim);
 
-	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::SecundaryAttack_TimeElapsed, 0.169f);
+	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::SecundaryAttack_TimeElapsed, AnimAttackDelay);
 }
 
 void ASCharacter::SecundaryAttack_TimeElapsed()
@@ -115,7 +115,7 @@ void ASCharacter::UltimateAttack()
 {
 	PlayAnimMontage(AttackAnim);
 
-	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::UltimateAttack_TimeElapsed, 0.169f);
+	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::UltimateAttack_TimeElapsed, AnimAttackDelay);
 }
 
 void ASCharacter::UltimateAttack_TimeElapsed()
@@ -125,21 +125,25 @@ void ASCharacter::UltimateAttack_TimeElapsed()
 
 void ASCharacter::Attack(TSubclassOf<ASProjectileBase> inProjectileClass)
 {
-	const FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
+	if (ensure(inProjectileClass))
+	{
+		const FVector HandLocation = GetMesh()->GetSocketLocation("Muzzle_01");
 	
-	FHitResult Hit;
-	FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 3000.f);	
-	bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraComp->GetComponentLocation(), TraceEnd, ECollisionChannel::ECC_Visibility);
+		FHitResult Hit;
+		FVector TraceEnd = CameraComp->GetComponentLocation() + (GetControlRotation().Vector() * 3000.f);	
+		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, CameraComp->GetComponentLocation(), TraceEnd, ECollisionChannel::ECC_Visibility);
 
-	FVector TargetLocation = bHit ? Hit.Location : TraceEnd;
-	FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetLocation - HandLocation).Rotator();
+		FVector TargetLocation = bHit ? Hit.Location : TraceEnd;
+		FRotator TargetRotation = FRotationMatrix::MakeFromX(TargetLocation - HandLocation).Rotator();
 	
-	const FTransform SpawnTM = FTransform(TargetRotation, HandLocation);
+		const FTransform SpawnTM = FTransform(TargetRotation, HandLocation);
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Instigator = this;
-	GetWorld()->SpawnActor<ASProjectileBase>(inProjectileClass, SpawnTM, SpawnParams);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Instigator = this;
+		
+		GetWorld()->SpawnActor<ASProjectileBase>(inProjectileClass, SpawnTM, SpawnParams);
+	}
 }
 
 void ASCharacter::PrimaryInteract()
