@@ -2,6 +2,7 @@
 
 
 #include "SProjectileBase.h"
+
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -27,6 +28,8 @@ ASProjectileBase::ASProjectileBase()
 }
 
 
+
+
 void ASProjectileBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
@@ -47,7 +50,7 @@ void ASProjectileBase::Explode_Implementation()
 	if (ensure(!IsPendingKill()))
 	{
 		UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
-
+		
 		Destroy();
 	}
 }

@@ -4,7 +4,10 @@
 #include "SMagicProjectile.h"
 
 #include "SAttributeComponent.h"
+#include "Components/AudioComponent.h"
 #include "Components/SphereComponent.h"
+#include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ASMagicProjectile::ASMagicProjectile()
@@ -12,7 +15,8 @@ ASMagicProjectile::ASMagicProjectile()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
-
+	ProjectileFlightSound = CreateDefaultSubobject<UAudioComponent>(TEXT("ProjFlightSound"));
+	ProjectileFlightSound->SetupAttachment(SphereComp);
 
 }
 
@@ -20,7 +24,13 @@ ASMagicProjectile::ASMagicProjectile()
 void ASMagicProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	ACharacter* InstigatorCharacter = Cast<ACharacter>(GetInstigator());
+	if (InstigatorCharacter)
+	{
+		const FVector HandLocation = InstigatorCharacter->GetMesh()->GetSocketLocation("Muzzle_01");
+		UGameplayStatics::SpawnEmitterAttached(CastEffect, nullptr, NAME_None, HandLocation);
+	}
 }
 
 void ASMagicProjectile::PostInitializeComponents()
@@ -40,8 +50,17 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 			AttributeComp->ApplyHealthChange(ProjectileDamage);
 		}
 
+		UGameplayStatics::PlayWorldCameraShake(this, CameraShake, GetActorLocation(), 0.f, CameraShakeOuterRadius);
+
 		Explode();
 	}
+}
+
+void ASMagicProjectile::Explode_Implementation()
+{
+	Super::Explode_Implementation();
+
+	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 }
 
 // Called every frame

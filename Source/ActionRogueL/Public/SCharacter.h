@@ -21,6 +21,9 @@ class ACTIONROGUEL_API ASCharacter : public ACharacter
 
 protected:
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsAlive = true;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
 	float AnimAttackDelay = 0.169f;
 
@@ -45,6 +48,8 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	virtual void PostInitializeComponents() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	USpringArmComponent* SpringArmComp;
@@ -87,6 +92,9 @@ protected:
 	
 	UFUNCTION()
 	void PrimaryInteract();
+
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
 
 
 public:	

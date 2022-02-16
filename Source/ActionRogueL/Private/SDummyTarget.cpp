@@ -4,6 +4,7 @@
 #include "SDummyTarget.h"
 
 #include "SAttributeComponent.h"
+#include "Blueprint/UserWidget.h"
 
 // Sets default values
 ASDummyTarget::ASDummyTarget()

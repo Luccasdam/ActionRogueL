@@ -42,6 +42,12 @@ void ASCharacter::BeginPlay()
 	
 }
 
+void ASCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	AttributeComp->OnHealthChanged.AddDynamic(this, &ASCharacter::OnHealthChanged);
+}
 
 
 // Called every frame
@@ -149,4 +155,16 @@ void ASCharacter::Attack(TSubclassOf<ASProjectileBase> inProjectileClass)
 void ASCharacter::PrimaryInteract()
 {
 	InteractionComp->PrimaryInteract();
+}
+
+void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta)
+{
+	GetMesh()->SetScalarParameterValueOnMaterials("TimeToHit", GetWorld()->TimeSeconds);
+	
+	if (NewHealth <= 0.f && Delta < 0.f)
+	{
+		bIsAlive = false;
+		APlayerController* MyPC = Cast<APlayerController>(GetController());
+		DisableInput(MyPC);
+	}
 }

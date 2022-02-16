@@ -10,11 +10,26 @@ USAttributeComponent::USAttributeComponent()
 
 bool USAttributeComponent::ApplyHealthChange(float DeltaHealth)
 {
-	Health += DeltaHealth;
-
-	OnHealthChanged.Broadcast(nullptr, this, Health, DeltaHealth);
+	const float LastHealth = Health;
 	
-	return true;
+	Health += DeltaHealth;
+	const float NewHealth = FMath::Clamp(Health, 0.f, MaxHealth);
+	Health = NewHealth;
+	
+	if (Health != LastHealth)
+	{
+		OnHealthChanged.Broadcast(nullptr, this, NewHealth, DeltaHealth);
+
+		UE_LOG(LogTemp, Warning, TEXT("New Health is %f"), NewHealth)
+		return true;
+	}	
+
+	return false;
+}
+
+bool USAttributeComponent::IsAlive() const
+{
+	return Health > 0.f;
 }
 
 
