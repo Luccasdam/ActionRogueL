@@ -12,7 +12,6 @@ ASPickUpItem::ASPickUpItem()
 	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ItemMesh"));
 	SetRootComponent(ItemMesh);
 	ItemMesh->SetCollisionProfileName("OverlapAllDynamic");
-
 }
 
 // Called when the game starts or when spawned
@@ -20,21 +19,14 @@ void ASPickUpItem::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (bStartInactive)
-	{
-		SetupCooldown(ItemCooldown);
-	}
-
+	if (bStartInactive)    SetupCooldown(ItemCooldown);
 }
 
 void ASPickUpItem::Interact_Implementation(APawn* InstigatorPawn)
 {
 	ISGameplayInterface::Interact_Implementation(InstigatorPawn);
 
-	if (ItemEffect(InstigatorPawn))
-	{
-		SetupCooldown(ItemCooldown);
-	}
+	if (ItemEffect(InstigatorPawn))    SetupCooldown(ItemCooldown);
 }
 
 // bool ASPickUpItem::ItemEffect_Implementation(APawn* InstigatorPawn)

@@ -55,19 +55,19 @@ void USInteractionComponent::PrimaryInteract()
 	
 	GetWorld()->SweepMultiByObjectType(Hits, ViewLocation, EndLocation, FQuat::Identity, ObjQueryParams, CollisionShape);
 
-	for (FHitResult Hit : Hits)
+	for (FHitResult& Hit : Hits)
 	{
 		if(AActor* HitActor = Hit.GetActor())
 		{
-			bool bInteractAble = HitActor->Implements<USGameplayInterface>();
-			if (bInteractAble)
+			const bool bIsInteractAble = HitActor->Implements<USGameplayInterface>();
+			if (bIsInteractAble)
 			{
 				APawn* InstigatorPawn = Cast<APawn>(GetOwner());
 				ISGameplayInterface::Execute_Interact(HitActor, InstigatorPawn);
 			}
 			
-			FVector DrawEndLocation = Hit.bBlockingHit ? Hit.Location : Hit.TraceEnd;
-			FColor DebugColor = bInteractAble ? FColor::Green : FColor::Red;
+			const FVector DrawEndLocation = Hit.bBlockingHit ? Hit.Location : Hit.TraceEnd;
+			const FColor DebugColor = bIsInteractAble ? FColor::Green : FColor::Red;
 			DrawDebugSphere(GetWorld(), DrawEndLocation, 15.f, 16, DebugColor, false, 2.f, 0, 2.f);
 			
 			break;
