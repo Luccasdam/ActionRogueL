@@ -38,7 +38,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;
 
-
-
-		
+	UFUNCTION(BlueprintCallable)
+	bool IsFullHealth() const;
 };
+
+inline bool USAttributeComponent::IsFullHealth() const	{ return Health == MaxHealth; }

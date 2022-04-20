@@ -30,7 +30,7 @@ protected:
 	UStaticMeshComponent* ItemMesh;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Defaults")
-	float ItemCooldown = 10.f;
+	float ItemCooldown;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
 	bool bStartInactive = true;
@@ -40,10 +40,4 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void ActivateItem();
-
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 };
