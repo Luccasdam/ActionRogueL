@@ -18,6 +18,7 @@ ASProjectileBase::ASProjectileBase()
 	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
 	SetRootComponent(SphereComp);
 	SphereComp->SetCollisionProfileName("Projectile");
+	SphereComp->IgnoreActorWhenMoving(GetInstigator(), true);
 
 	EffectComp = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("EffectComp"));
 	EffectComp->SetupAttachment(SphereComp);

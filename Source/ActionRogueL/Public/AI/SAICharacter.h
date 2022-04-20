@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "SAICharacter.generated.h"
 
+class USAttributeComponent;
+class UPawnSensingComponent;
+
 UCLASS()
 class ACTIONROGUEL_API ASAICharacter : public ACharacter
 {
@@ -19,11 +22,23 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void PostInitializeComponents() override;
+
+	UPROPERTY(VisibleAnywhere)
+	USAttributeComponent* AttributeComp;
+
+	UPROPERTY(VisibleAnywhere)
+	UPawnSensingComponent* PawnSenseComp;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+private:
+	UFUNCTION()
+	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	UFUNCTION()
+	void OnPawnSeen(APawn* Pawn);
 
 };
