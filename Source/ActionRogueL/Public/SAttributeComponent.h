@@ -39,7 +39,17 @@ public:
 	bool IsAlive() const;
 
 	UFUNCTION(BlueprintCallable)
+	float GetHealth() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetHealthToFull();
+
+	UFUNCTION(BlueprintCallable)
 	bool IsFullHealth() const;
 };
+
+inline float USAttributeComponent::GetHealth() const	{ return Health; }
+
+inline void USAttributeComponent::SetHealthToFull()	{ Health = MaxHealth; }
 
 inline bool USAttributeComponent::IsFullHealth() const	{ return Health == MaxHealth; }
