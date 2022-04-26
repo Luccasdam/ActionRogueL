@@ -21,5 +21,7 @@ class ACTIONROGUEL_API USBTTask_RangedAttack : public UBTTaskNode
 protected:
 	UPROPERTY(EditAnywhere, Category = AI)
 	TSubclassOf<ASProjectileBase> ProjectileClass;
-	
+
+	UPROPERTY(EditAnywhere, Category = AI)
+	int32 MaxBulletSpread;
 };

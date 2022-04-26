@@ -19,13 +19,21 @@ public:
 	// Sets default values for this component's properties
 	USAttributeComponent();
 
+	UFUNCTION(BlueprintCallable, Category = Attributes)
+	static USAttributeComponent* GetAttributes(AActor* FromActor);
+
+	UFUNCTION(BlueprintCallable, Category = Attributes)
+	static bool IsActorAlive(APawn* FromPawn);
+
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
-	float Health = 100.f;
+	float MaxHealth;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
-	float MaxHealth = 100.f;
+private:
+
+	UPROPERTY(BlueprintReadOnly, Category = "Attributes", meta = (AllowPrivateAccess))
+	float Health;
 
 public:
 
@@ -33,7 +41,7 @@ public:
 	FOnHealthChanged OnHealthChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	bool ApplyHealthChange(float DeltaHealth);
+	bool ApplyHealthChange(AActor* InstigatorActor, float DeltaHealth);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;
@@ -53,3 +61,6 @@ inline float USAttributeComponent::GetHealth() const	{ return Health; }
 inline void USAttributeComponent::SetHealthToFull()	{ Health = MaxHealth; }
 
 inline bool USAttributeComponent::IsFullHealth() const	{ return Health == MaxHealth; }
+
+inline bool USAttributeComponent::IsAlive() const	{ return Health > 0.0f; }
+

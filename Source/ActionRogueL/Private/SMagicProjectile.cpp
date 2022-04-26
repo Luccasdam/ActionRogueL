@@ -11,13 +11,9 @@
 
 // Sets default values
 ASMagicProjectile::ASMagicProjectile()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-	
+{	
 	ProjectileFlightSound = CreateDefaultSubobject<UAudioComponent>(TEXT("ProjFlightSound"));
 	ProjectileFlightSound->SetupAttachment(SphereComp);
-
 }
 
 // Called when the game starts or when spawned
@@ -25,7 +21,7 @@ void ASMagicProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ACharacter* InstigatorCharacter = Cast<ACharacter>(GetInstigator());
+	const ACharacter* InstigatorCharacter = Cast<ACharacter>(GetInstigator());
 	if (InstigatorCharacter)
 	{
 		const FVector HandLocation = InstigatorCharacter->GetMesh()->GetSocketLocation("Muzzle_01");
@@ -45,13 +41,8 @@ void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent,
 	if (OtherActor != GetInstigator())
 	{
 		USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
-		if (AttributeComp)
-		{
-			AttributeComp->ApplyHealthChange(ProjectileDamage);
-		}
-
-		UGameplayStatics::PlayWorldCameraShake(this, CameraShake, GetActorLocation(), 0.f, CameraShakeOuterRadius);
-
+		if (AttributeComp)    AttributeComp->ApplyHealthChange(GetInstigator(), ProjectileDamage);
+		
 		Explode();
 	}
 }
@@ -60,13 +51,6 @@ void ASMagicProjectile::Explode_Implementation()
 {
 	Super::Explode_Implementation();
 
+	UGameplayStatics::PlayWorldCameraShake(this, CameraShake, GetActorLocation(), 0.f, CameraShakeOuterRadius);
 	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 }
-
-// Called every frame
-void ASMagicProjectile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
