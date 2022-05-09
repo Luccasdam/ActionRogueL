@@ -19,7 +19,6 @@ ASCharacter::ASCharacter()
 	,	InteractionComp(CreateDefaultSubobject<USInteractionComponent>(TEXT("InteractionComp")))
 	,	AttributesComp(CreateDefaultSubobject<USAttributesComponent>(TEXT("AttributesComp")))
 	,	ActionComp(CreateDefaultSubobject<USActionComponent>(TEXT("ActionComp")))
-	,	HandSocketName(TEXT("Muzzle_01"))
 {
 	SpringArmComp->SetupAttachment(RootComponent);
 	CameraComp->SetupAttachment(SpringArmComp);
@@ -27,6 +26,14 @@ ASCharacter::ASCharacter()
 	SpringArmComp->bUsePawnControlRotation = true;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
+}
+
+void ASCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	AttributesComp->OnApplyHealthChange.AddDynamic(this, &ASCharacter::OnHealthChanged);
+	AttributesComp->OnDeath.AddDynamic(this, &ASCharacter::OnDeath);
 }
 
 
@@ -41,7 +48,7 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ASCharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("PrimaryAttack"), IE_Pressed, this, &ASCharacter::PrimaryAttack);
-	PlayerInputComponent->BindAction(TEXT("SecundaryAttack"), IE_Pressed, this, &ASCharacter::SecundaryAttack);
+	PlayerInputComponent->BindAction(TEXT("SecondaryAttack"), IE_Pressed, this, &ASCharacter::SecondaryAttack);
 	PlayerInputComponent->BindAction(TEXT("UltimateAttack"), IE_Pressed, this, &ASCharacter::UltimateAttack);
 	PlayerInputComponent->BindAction(TEXT("Interact"), IE_Pressed, this, &ASCharacter::Interact);
 
@@ -49,13 +56,6 @@ void ASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 	PlayerInputComponent->BindAction(TEXT("Sprint"), IE_Released, this, &ASCharacter::SprintStop);
 }
 
-void ASCharacter::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	AttributesComp->OnApplyHealthChange.AddDynamic(this, &ASCharacter::OnHealthChanged);
-	AttributesComp->OnDeath.AddDynamic(this, &ASCharacter::OnDeath);
-}
 
 FVector ASCharacter::GetPawnViewLocation() const
 {
@@ -77,6 +77,7 @@ void ASCharacter::MoveRight(float Value)
 	AddMovementInput(RightVec, Value);
 }
 
+
 void ASCharacter::SprintStart()
 {
 	ActionComp->StartActionByName(this, "Sprint");
@@ -87,51 +88,19 @@ void ASCharacter::SprintStop()
 	ActionComp->StopActionByName(this, "Sprint");
 }
 
-
 void ASCharacter::PrimaryAttack()
 {	
-	PlayAnimMontage(AttackAnimMontage);
-	ProjectileClass = MagicProjectileClass;
-	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::Attack_TimeElapsed, 0.169f);
+	ActionComp->StartActionByName(this, TEXT("PrimaryAttack"));
 }
 
-void ASCharacter::SecundaryAttack()
+void ASCharacter::SecondaryAttack()
 {
-	PlayAnimMontage(AttackAnimMontage);
-	ProjectileClass = DashProjectileClass;
-	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::Attack_TimeElapsed, 0.169f);
+	ActionComp->StartActionByName(this, TEXT("Dash"));
 }
 
 void ASCharacter::UltimateAttack()
 {
-	PlayAnimMontage(AttackAnimMontage);
-	ProjectileClass = BlackHoleProjectileClass;
-	GetWorldTimerManager().SetTimer(TimerHandle_Attack, this, &ASCharacter::Attack_TimeElapsed, 0.169f);
-}
-
-void ASCharacter::Attack_TimeElapsed()
-{
-	const FVector HandLocation = GetMesh()->GetSocketLocation(HandSocketName);
-	
-	FHitResult Hit;
-	FVector EndLocation = CameraComp->GetComponentLocation() + CameraComp->GetForwardVector() * 2000.f;
-	
-	FCollisionQueryParams CollisionQueryParams;
-	CollisionQueryParams.AddIgnoredActor(this);
-	
-	bool bHitTarget = GetWorld()->LineTraceSingleByChannel(Hit, HandLocation, EndLocation, ECC_Visibility, CollisionQueryParams);
-	FVector TargetLocation = bHitTarget ? Hit.Location : Hit.TraceEnd;
-	FRotator TargetRotation = (TargetLocation - HandLocation).Rotation();
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Instigator = this;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	
-	const FTransform SpawnTM = FTransform(TargetRotation, HandLocation);
-	
-	GetWorld()->SpawnActor<ASProjectileBase>(ProjectileClass, SpawnTM, SpawnParams);
-	
-	UGameplayStatics::SpawnEmitterAttached(CastSpellEffect, GetMesh(), HandSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget);
+	ActionComp->StartActionByName(this, TEXT("BlackHole"));
 }
 
 
@@ -139,6 +108,7 @@ void ASCharacter::Interact()
 {
 	InteractionComp->Interact();
 }
+
 
 void ASCharacter::OnHealthChanged(AActor* InstigatorActor, USAttributesComponent* OwningComp, float NewHealth, float Delta)
 {
@@ -152,7 +122,7 @@ void ASCharacter::OnDeath(AActor* InstigatorActor)
 {
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	DisableInput(PC);
-
+	
 	SetActorEnableCollision(false);
 	SpringArmComp->bDoCollisionTest = false;
 }

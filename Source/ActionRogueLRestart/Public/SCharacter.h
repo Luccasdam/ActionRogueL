@@ -1,11 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#pragma once
 
+#pragma once
 #include "CoreMinimal.h"
 #include "SAttributesComponent.h"
 #include "GameFramework/Character.h"
 #include "SCharacter.generated.h"
+
 
 class USpringArmComponent;
 class UCameraComponent;
@@ -20,13 +21,12 @@ class ACTIONROGUELRESTART_API ASCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	ASCharacter();
-
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual void PostInitializeComponents() override;
 
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
 	virtual FVector GetPawnViewLocation() const override;
 
 protected:
@@ -41,12 +41,10 @@ protected:
 
 	void PrimaryAttack();
 
-	void SecundaryAttack();
+	void SecondaryAttack();
 
 	void UltimateAttack();
-
-	void Attack_TimeElapsed();
-
+	
 	void Interact();
 
 	UFUNCTION()
@@ -54,6 +52,7 @@ protected:
 
 	UFUNCTION()
 	void OnDeath(AActor* InstigatorActor);
+	
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USpringArmComponent* SpringArmComp;
@@ -70,27 +69,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USActionComponent* ActionComp;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Attack")
-	UAnimMontage* AttackAnimMontage;
-
-	FTimerHandle TimerHandle_Attack;
-	UPROPERTY(VisibleAnywhere, Category = "Attack")
-	TSubclassOf<ASProjectileBase> ProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<ASProjectileBase> MagicProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<ASProjectileBase> DashProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<ASProjectileBase> BlackHoleProjectileClass;
-
-	UPROPERTY(EditDefaultsOnly, Category = "Effects")
-	UParticleSystem* CastSpellEffect;
-
-	FName HandSocketName;
-
+	
 public:
 	UFUNCTION(Exec)
 	void HealSelf(float Amount = 100)	{ AttributesComp->ApplyHealthChange(this, Amount); }

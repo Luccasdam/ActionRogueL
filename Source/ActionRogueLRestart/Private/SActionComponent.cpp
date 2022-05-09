@@ -16,6 +16,8 @@ USActionComponent::USActionComponent()
 void USActionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	AddActions(DefaultActions);
 }
 
 
@@ -34,6 +36,15 @@ void USActionComponent::AddAction(TSubclassOf<USAction> ActionClass)
 		Actions.Add(NewAction);
 	}
 }
+
+void USActionComponent::AddActions(TArray<TSubclassOf<USAction>> ActionsClasses)
+{
+	for (TSubclassOf<USAction> ActionClass : ActionsClasses)
+	{
+		if (ActionClass != nullptr)	AddAction(ActionClass);
+	}
+}
+
 
 bool USActionComponent::StartActionByName(AActor* InstigatorActor, FName ActionName)
 {

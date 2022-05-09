@@ -22,6 +22,9 @@ public:
 	void AddAction(TSubclassOf<USAction> ActionClass);
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
+	void AddActions (TArray<TSubclassOf<USAction>> ActionsClasses);
+
+	UFUNCTION(BlueprintCallable, Category = "Action")
 	bool StartActionByName(AActor* InstigatorActor, FName ActionName);
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
@@ -32,6 +35,10 @@ protected:
 
 	UPROPERTY()
 	TArray<USAction*> Actions;
+
+	/* Granted abilities at game start */
+	UPROPERTY(EditAnywhere, Category = "Actions")
+	TArray<TSubclassOf<USAction>> DefaultActions;
 
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

@@ -11,18 +11,26 @@ class ASProjectileBase;
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class ACTIONROGUELRESTART_API USAction_ProjectileAttack : public USAction
 {
 	GENERATED_BODY()
 
+public:
+	USAction_ProjectileAttack();
+	
+	virtual void StartAction_Implementation(AActor* InstigatorActor) override;
+
 protected:
 
-	UPROPERTY(EditAnywhere, CAtegory = "Attack")
-	TSubclassOf<ASProjectileBase> ProjectileClass;
+	UFUNCTION()
+	void AttackDelay_TimeElapsed(ACharacter* InstigatorCharacter);
 
 	UPROPERTY(VisibleAnywhere, Category = "Effects")
 	FName HandSocketName;
+
+	UPROPERTY(EditAnywhere, CAtegory = "Attack")
+	TSubclassOf<ASProjectileBase> ProjectileClass;	
 
 	UPROPERTY(EditDefaultsOnly, Category = "Attack")
 	float AttackAnimDelay;
@@ -33,4 +41,8 @@ protected:
 	/* Partciels System played during attack animation */
 	UPROPERTY(EditAnywhere, Category = "Attack")
 	UParticleSystem* CastingEffect;
+
+
+
+
 };
